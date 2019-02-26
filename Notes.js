@@ -13,23 +13,45 @@ class Notes extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
-      notes:[],
-      currentNewText:'',
+      notes:null,
+      currentNewNote:{title:'', text:''},
       editNotice:false
     }
   }
+  // hacky way to re-render notes when the user goes back
+  // to the notes screen
+  //TODO: add in redux
   componentDidMount() {
     this.getNotes();
-  }
+      this._subscribe = this.props.navigation.addListener('didFocus', () => {
+        this.getNotes();
+      });
+    }
+
+    async deleteAllNotes() {
+      await storage.remove('notes');
+      this.getNotes();
+    }
 
   async getNotes() {
     await storage.get('notes').then((data) => {
+      if(data !== null){
         this.setState({notes:data})
+      }
+      else {
+        this.setState({notes:[]})
+      }
     })
   }
 
+  getNote(noteObj) {
+    this.props.navigation.navigate('note', {
+      data: noteObj
+    });
+  }
+
   addNote() {
-    if(this.state.currentNewText === ''){
+    if(this.state.currentNewNote.text === ''){
         this.setState({editNotice:true})
         return;
     }
@@ -38,11 +60,14 @@ class Notes extends Component<Props> {
         let length = this.state.notes.length - 1;
         let newId = length + 1
         let obj = {
-            text:this.state.currentNewText,
-            id:newId
+            text:this.state.currentNewNote.text,
+            id:newId,
+            title:this.state.currentNewNote.title,
         }
         copy.push(obj);
-        this.setState({notes:copy})
+        this.setState({notes:copy}, () => {
+          this.saveAll();
+        })
     }
   }
 
@@ -59,23 +84,39 @@ class Notes extends Component<Props> {
         top = <Text>View notes or create a new one</Text>
     }
     let view;
-    let array = []
-    if (this.state.notes.length > 0) {
-      array = this.state.notes.map((noteObj, index) => {
-        return <Text
-          contentContainerStyle={{
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}
-          key={index} onPress={() => { this.getNote(noteObj.id) }}>{noteObj.text}</Text>
-      })
+    let array;
+    let none = <Text>No notes to show currently</Text>
+    if(this.state.notes !== null){
+      if (this.state.notes.length > 0) {
+        array = this.state.notes.map((noteObj, index) => {
+          return <Text
+            contentContainerStyle={{
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+            key={index} onPress={() => { this.getNote(noteObj) }}>{noteObj.title}</Text>
+        })
+      }
+      else {
+        array = none
+      }
     }
+  
       view = <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
       <View>
         {top}
-      <Button title="Save Notes" onPress={() => { this.saveAll()}}></Button>
-        <Button title="Create Notes" onPress={() => { this.addNote()}}></Button>
-        <TextInput onChangeText={(text)=>{this.setState({currentNewText:text})}}></TextInput>
+        <Button title="Delete Notes" onPress={() => { this.deleteAllNotes()}}></Button>
+        <Button title="Create Note" onPress={() => { this.addNote()}}></Button>
+        <TextInput placeholder="title" onChangeText={(text)=>{
+          let copy = this.state.currentNewNote;
+          copy.title = text;
+          this.setState({currentNewNote:copy})}}
+          ></TextInput>
+        <TextInput placeholder="text" onChangeText={(text)=>{
+          let copy = this.state.currentNewNote;
+          copy.text = text;
+          this.setState({currentNewNote:copy})}}
+          ></TextInput>
         <ScrollView contentContainerStyle={styles.wrapper}>
           {array}
         </ScrollView>

@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import Pattern from "./Pattern";
 import Notes from "./Notes";
+import Note from "./Note";
 import data from "./dataFiles/allPatterns.json";
 import { createStackNavigator, createAppContainer } from 'react-navigation';
 
@@ -97,7 +98,8 @@ const styles = StyleSheet.create({
 const MainNavigator = createStackNavigator({
   home: { screen: Home },
   pattern: { screen: Pattern },
-  notes: { screen: Notes }
+  notes: { screen: Notes },
+  note: { screen: Note }
 },
   {
     initialRouteName: "home"

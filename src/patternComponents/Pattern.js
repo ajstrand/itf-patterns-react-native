@@ -62,17 +62,14 @@ export default class Pattern extends Component<Props> {
 const styles = StyleSheet.create({
   wrapper: {
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingLeft:15,
+    paddingRight:15,
   },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
   }
 });

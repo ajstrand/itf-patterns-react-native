@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import {
     StyleSheet, Text,
-    View, ScrollView,
-    Button
+    View, SafeAreaView,
+    ScrollView,
+    Button, KeyboardAvoidingView
 } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
+import TextArea from "./TextArea";
 import storage from 'react-native-modest-storage';
 
 type Props = {};
@@ -53,51 +55,47 @@ export default class Note extends Component<Props> {
         let content = null;
         let view = null;
         if (this.state.edit) {
-            view = <View>
+            view = <KeyboardAvoidingView
+            style={styles.wrapper}>
                 <TextInput
+                    style={styles.textStyle}
                     value={this.state.title}
                     onChangeText={(text) => this.setState({ title: text })}>
                 </TextInput>
-                <TextInput
+                <ScrollView contentContainerStyle={styles.wrapper}>
+                <TextArea
+                    style={styles.textStyle}
                     value={this.state.note}
                     onChangeText={(text) => this.setState({ note: text })}>
-                </TextInput>
-                <Button
-                    title="Save edit"
-                    onPress={() => this.saveEdits()}
-                ></Button>
-            </View>
+                </TextArea>
+                </ScrollView>
+            <Button
+            style={styles.button}
+            title="Save edit"
+            onPress={() => this.saveEdits()}
+        ></Button>
+        </KeyboardAvoidingView>
             return view;
         }
         if (this.state.error) {
-            view = <View>
-                <Button
-                    title="Back"
-                    onPress={() => this.props.navigation.goBack()}
-                ></Button>
+            view = <View style={styles.wrapper}>
                 <Text>An error occured trying to render the note you selected :(</Text>
             </View>
             return view;
         }
         else {
-            content = <Fragment>
-            <Button title="Edit"
-            onPress={() => this.editNote()}
-        ></Button>
-        <ScrollView contentContainerStyle={styles.wrapper}>
-            <Text>{this.state.title}</Text>
-            <Text>{this.state.note}</Text>
-        </ScrollView>
-        </Fragment>  
+            content = <View style={styles.container}>
+                <Button style={styles.button} title="Edit"
+                    onPress={() => this.editNote()}
+                ></Button>
+                <Text style={styles.textStyle}>{this.state.title}</Text>
+                <ScrollView contentContainerStyle={styles.wrapper}>
+                    <Text style={styles.textStyle}>{this.state.note}</Text>
+                </ScrollView>
+            </View>
         }
         const baseView = <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
-        <View>
-            <Button
-                title="Back"
-                onPress={() => this.props.navigation.navigate('Home')}
-            >Back</Button> 
-            {content}
-        </View>
+                {content}
         </KeyboardAvoidingView>;
         view = baseView;
         return view;
@@ -105,19 +103,29 @@ export default class Note extends Component<Props> {
 }
 
 const styles = StyleSheet.create({
+    button: {
+        width:40
+    },
     wrapper: {
+        flex:1,
         justifyContent: 'center',
         alignItems: 'center'
     },
+    showScrollText: {
+        flex:1,
+        justifyContent: 'center',
+        alignItems: 'flex-start'
+    },
     container: {
         flex: 1,
-        justifyContent: 'center',
+        marginTop:20,
+        justifyContent: 'flex-start',
         alignItems: 'center',
         backgroundColor: '#F5FCFF',
     },
-    welcome: {
-        fontSize: 20,
-        textAlign: 'center',
-        margin: 10,
+    textStyle: {
+        paddingLeft:15,
+        paddingRight:15,
+        fontSize:20
     }
 });

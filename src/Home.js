@@ -36,12 +36,12 @@ class Home extends Component<Props> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent:'space-evenly',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
   buttonStyles:{
-    margin:15
+    width:20
   }
 });
 

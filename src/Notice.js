@@ -19,7 +19,6 @@ const styles = StyleSheet.create({
         fontSize:18
     },
     container: {
-      flex: 1,
       margin:15,
       justifyContent: 'flex-start',
       alignItems: 'center',

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import {StyleSheet,
-  View, KeyboardAvoidingView, Button, Text
+  View, KeyboardAvoidingView, Button
 } from 'react-native';
+import TextArea from "./TextArea";
 import { TextInput } from 'react-native-gesture-handler';
 import storage from 'react-native-modest-storage';
 
@@ -13,14 +14,25 @@ class CreateNote extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
+      notes:null,
       currentNewNote:{title:'', text:''},
       noContent:false
     }
   }
 
-    async deleteAllNotes() {
-      await storage.remove('notes');
-      this.getNotes();
+  componentDidMount() {
+    this.getNotes();
+  }
+
+    async getNotes() {
+      await storage.get('notes').then((data) => {
+        if (data !== null) {
+          this.setState({ notes: data })
+        }
+        else {
+          this.setState({ notes: [] })
+        }
+      })
     }
 
   addNote() {
@@ -56,24 +68,17 @@ class CreateNote extends Component<Props> {
   }
 
   render() {
-    let top = null;
-    if(this.state.noContent){
-        top = <Text>Input must be a non empty string</Text>
-    }
-    else {
-        top = <Text>View notes or create a new one</Text>
-    }
      const view = <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
       <View>
         <Button style={styles.buttonStyles} title="Create Note" onPress={() => { this.addNote()}}></Button>
-        <TextInput style={styles.inputStyles} placeholder="title" onChangeText={(text)=>{
+        <TextInput style={styles.inputStyles} placeholder="Title" onChangeText={(text)=>{
             this.updateState("title", text); 
         }}
           ></TextInput>
-        <TextInput style={styles.inputStyles} placeholder="text" onChangeText={(text)=>{
+        <TextArea style={styles.inputStyles} placeholder="Text" onChangeText={(text)=>{
             this.updateState("text", text); 
         }}
-          ></TextInput>
+          ></TextArea>
       </View>
       </KeyboardAvoidingView>
       ;

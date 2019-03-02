@@ -3,7 +3,6 @@ import {
   StyleSheet, Text,
   View, KeyboardAvoidingView, ScrollView, Button
 } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
 import storage from 'react-native-modest-storage';
 
 type Props = {};
@@ -14,7 +13,8 @@ class Notes extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
-      notes: null
+      notes: null,
+      deleteDisabled:true
     }
   }
   // hacky way to re-render notes when the user goes back
@@ -35,10 +35,10 @@ class Notes extends Component<Props> {
   async getNotes() {
     await storage.get('notes').then((data) => {
       if (data !== null) {
-        this.setState({ notes: data })
+        this.setState({ notes: data, deleteDisabled:false })
       }
       else {
-        this.setState({ notes: [] })
+        this.setState({ notes: [], deleteDisabled:true })
       }
     })
   }
@@ -50,7 +50,9 @@ class Notes extends Component<Props> {
   }
 
   createDataArray() {
-    let none = <Text>No notes to show currently</Text>
+    let noNotesInDatabase = <Text
+    style={{fontSize:20}}
+    >No notes to show currently</Text>
     let array = null;
     if (this.state.notes !== null) {
       if (this.state.notes.length > 0) {
@@ -60,11 +62,12 @@ class Notes extends Component<Props> {
               justifyContent: 'center',
               alignItems: 'center'
             }}
+            style={{fontSize:20}}
             key={index} onPress={() => { this.getNote(noteObj) }}>{noteObj.title}</Text>
         })
       }
       else {
-        array = none
+        array = noNotesInDatabase
       }
     }
     return array;
@@ -73,13 +76,15 @@ class Notes extends Component<Props> {
   createRenderView(array) {
     const view = <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
       <View>
-        <Button style={styles.buttonStyles} title="Delete Notes" onPress={() => { this.deleteAllNotes() }}></Button>
-        <Button style={styles.buttonStyles} title="Create Note" onPress={() => {
-          this.props.navigation.navigate('createNote');
-        }}></Button>
         <ScrollView contentContainerStyle={styles.wrapper}>
           {array}
         </ScrollView>
+        <View style={styles.row}>
+        <Button style={styles.button} disabled={this.state.deleteDisabled} title="Delete Notes" onPress={() => { this.deleteAllNotes() }}></Button>
+        <Button style={styles.button} title="Create Note" onPress={() => {
+          this.props.navigation.navigate('createNote');
+        }}></Button>
+        </View>
       </View>
     </KeyboardAvoidingView>
     return view;
@@ -96,12 +101,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop:20,
-    justifyContent: 'flex-start',
+    justifyContent:'flex-start',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
-  buttonStyles:{
-    marginBottom:5
+  button: {
+   marginHorizontal:30,
+   marginVertical:30,
+    width:20
+  },
+  row:{
+    flex: 1,
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems: 'center',
   }
 });
 

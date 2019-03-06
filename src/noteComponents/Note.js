@@ -107,12 +107,10 @@ const styles = StyleSheet.create({
         width:40
     },
     wrapper: {
-        flex:1,
         justifyContent: 'center',
         alignItems: 'center'
     },
     showScrollText: {
-        flex:1,
         justifyContent: 'center',
         alignItems: 'flex-start'
     },

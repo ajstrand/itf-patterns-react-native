@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {
   StyleSheet, Text,
-  View, KeyboardAvoidingView, ScrollView, Button
+  View, KeyboardAvoidingView, FlatList, Button
 } from 'react-native';
 import storage from 'react-native-modest-storage';
 
@@ -14,7 +14,7 @@ class Notes extends Component<Props> {
     super(props);
     this.state = {
       notes: null,
-      deleteDisabled:true
+      deleteDisabled: true
     }
   }
   // hacky way to re-render notes when the user goes back
@@ -35,10 +35,10 @@ class Notes extends Component<Props> {
   async getNotes() {
     await storage.get('notes').then((data) => {
       if (data !== null) {
-        this.setState({ notes: data, deleteDisabled:false })
+        this.setState({ notes: data, deleteDisabled: false })
       }
       else {
-        this.setState({ notes: [], deleteDisabled:true })
+        this.setState({ notes: [], deleteDisabled: true })
       }
     })
   }
@@ -49,50 +49,42 @@ class Notes extends Component<Props> {
     });
   }
 
-  createDataArray() {
-    let noNotesInDatabase = <Text
-    style={{fontSize:20}}
-    >No notes to show currently</Text>
-    let array = null;
-    if (this.state.notes !== null) {
-      if (this.state.notes.length > 0) {
-        array = this.state.notes.map((noteObj, index) => {
-          return <Text
-            contentContainerStyle={{
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}
-            style={{fontSize:20}}
-            key={index} onPress={() => { this.getNote(noteObj) }}>{noteObj.title}</Text>
-        })
-      }
-      else {
-        array = noNotesInDatabase
-      }
-    }
-    return array;
+  _renderDataItem = ({ item }) => {
+    return <Text
+      contentContainerStyle={{
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
+      style={{ fontSize: 20 }}
+      key={item.id} onPress={() => { this.getNote(item) }}>{item.title}</Text>
   }
 
-  createRenderView(array) {
+  _keyExtractor = (item, index) => item.id;
+
+  createRenderView() {
     const view = <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
-      <View>
-        <ScrollView contentContainerStyle={styles.wrapper}>
-          {array}
-        </ScrollView>
-        <View style={styles.row}>
+      <FlatList
+        contentContainerStyle={styles.list}
+        ListEmptyComponent={<Text
+          style={{ fontSize: 20 }}
+        >No notes to show currently</Text>}
+        data={this.state.notes}
+        extraData={this.state}
+        keyExtractor={this._keyExtractor}
+        renderItem={this._renderDataItem}
+      />
+      <View style={styles.row}>
         <Button style={styles.button} disabled={this.state.deleteDisabled} title="Delete Notes" onPress={() => { this.deleteAllNotes() }}></Button>
         <Button style={styles.button} title="Create Note" onPress={() => {
           this.props.navigation.navigate('createNote');
         }}></Button>
-        </View>
       </View>
     </KeyboardAvoidingView>
     return view;
   }
 
   render() {
-    let array = this.createDataArray();
-    let view = this.createRenderView(array);
+    let view = this.createRenderView();
     return view;
   }
 }
@@ -100,21 +92,21 @@ class Notes extends Component<Props> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop:20,
-    justifyContent:'flex-start',
-    alignItems: 'center',
+    paddingTop: 20,
+    paddingBottom:20,
     backgroundColor: '#F5FCFF',
   },
-  button: {
-   marginHorizontal:30,
-   marginVertical:30,
-    width:20
-  },
-  row:{
-    flex: 1,
-    flexDirection:'row',
-    justifyContent:'space-between',
+  list: {
+    justifyContent: 'flex-start',
     alignItems: 'center',
+  },
+  button: {
+    height: 20,
+    width: 20
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-around'
   }
 });
 

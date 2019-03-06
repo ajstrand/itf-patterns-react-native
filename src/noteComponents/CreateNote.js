@@ -45,8 +45,8 @@ class CreateNote extends Component<Props> {
         let length = this.state.notes.length - 1;
         let newId = length + 1
         let obj = {
+          id:newId,
             text:this.state.currentNewNote.text,
-            id:newId,
             title:this.state.currentNewNote.title,
         }
         copy.push(obj);

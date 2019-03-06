@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import {
   StyleSheet, Text,
-  View, ScrollView,
-  Button
+  View, FlatList
 } from 'react-native';
 
 type Props = {};
@@ -27,32 +26,48 @@ export default class Pattern extends Component<Props> {
     }
     let list = [];
     let obj = data.patternSteps;
-    for (const e in obj) {
-      list.push(<Text>{obj[e]}</Text>)
+    for (const patternStep in obj) {
+      if (obj.hasOwnProperty(patternStep)) {
+        const element = obj[patternStep];
+        list.push(element)
+      }
     }
     this.setState({ moveList: list })
+  }
+
+  _renderDataItem = (moveObj) => {
+    const text = moveObj.item;
+    const index = moveObj.index;
+    return <Text
+      contentContainerStyle={
+        {
+          justifyContent: 'center',
+          alignItems: 'center',
+        }
+      }
+      key={index} style={styles.textStyle}>{text}</Text>
   }
 
   render() {
     let view = null;
     if (this.state.error) {
       view = <View>
-        <Button
-          title="Back"
-          onPress={() => this.props.navigation.goBack()}
-        >Back</Button>
-        <Text>An error occured trying to render the pattern you selected :(</Text>
+        <Text style={styles.textStyle}>An error occured trying to render the pattern you selected :(</Text>
       </View>
     }
     else {
-      view = <View>
-        <Button
-          title="Back"
-          onPress={() => this.props.navigation.navigate('Home')}
-        >Back</Button>
-        <ScrollView contentContainerStyle={styles.wrapper}>
-          {this.state.moveList}
-        </ScrollView>
+      view = <View style={styles.container}>
+        <FlatList
+        style={styles.listStyle}
+          contentContainerStyle={styles.listStyle}
+          data={this.state.moveList}
+          ListEmptyComponent={<Text
+            style={{ fontSize: 20 }}
+          >No patterns to show. An error may have occured :(</Text>}
+          extraData={this.state}
+          keyExtractor={this._keyExtractor}
+          renderItem={this._renderDataItem}
+        />
       </View>
     }
     return view;
@@ -60,16 +75,20 @@ export default class Pattern extends Component<Props> {
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingLeft:15,
-    paddingRight:15,
-  },
   container: {
     flex: 1,
+    paddingLeft:15,
+    paddingRight:15,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: '#F5FCFF'
+  },
+  listStyle:{
+    flex:1,
+    width:'100%'
+  },
+  textStyle: {
+    fontSize: 24,
+    margin: 5
   }
 });
